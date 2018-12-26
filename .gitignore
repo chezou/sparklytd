@@ -4,3 +4,4 @@
 .Ruserdata
 logs
 inst/java/td-spark-assembly*.jar
+rsconnect

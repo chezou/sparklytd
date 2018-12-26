@@ -4,3 +4,4 @@ td-spark-assembly.*.jar$
 ^logs$
 .*Rmd$
 .*nb.html$
+^rsconnect$

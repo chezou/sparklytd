@@ -1,4 +1,9 @@
-# sparklytd
+---
+title: "sparklytd example notebook"
+output:
+  html_document:
+    df_print: paged
+---
 
 sparklytd is an extension to read and write TD data from/to R.
 
@@ -6,38 +11,70 @@ sparklytd is an extension to read and write TD data from/to R.
 
 You can install this package via devtools with:
 
-``` r
+
+```{r eval=FALSE}
 install.packages("devtools")
 devtools::install_github("chezou/sparklytd")
 ```
+
 
 ## Example
 
 This is a basic example to handle TD data:
 
-``` r
+```{r}
 # Assuming TD API key is set in environment varraible "TD_API_KEY". 
 library(sparklyr)
 library(sparklytd)
 
-# Before first connection, you need to download td-spark jar.
-download_jar()
+# Enable Java 9 if needed
+options(sparklyr.java9 = TRUE)
+```
 
+Before first execution, you need to download td-spark jar.
+
+```{r eval=FALSE}
+download_jar()
+```
+
+```{r}
 # Connect td-spark API
 default_conf <- spark_config()
 default_conf$spark.td.apikey=Sys.getenv("TD_API_KEY")
 default_conf$spark.serializer="org.apache.spark.serializer.KryoSerializer"
 default_conf$psark.sql.execution.arrow.enabled="true"
 
-# If you want to use Java9, set this option
-options(sparklyr.java9 = TRUE)
-
 sc <- spark_connect(master = "local", config = default_conf)
+```
 
-# Read data on TD
+Read and manupilate data on TD with dplyr.
+
+```{r}
+library(dplyr)
+
 df <- spark_read_td(sc, "www_access", "sample_datasets.www_access")
 df %>% count()
+```
 
+```{r}
+df %>%
+  filter(method == "GET", code != 200) %>%
+  head(50) %>%
+  collect
+```
+
+Next, plot the summarized info from access log.
+
+```{r}
+library(ggplot2)
+
+codes <- df %>% group_by(code) %>% summarise(count = n(), size_mean = mean(size)) %>% collect
+codes$code <- as.character(codes$code)
+ggplot(data=codes, aes(x=code, y=count)) + geom_bar(stat="identity") + scale_y_continuous(trans='log10')
+```
+
+
+```{r}
 # Copy R data.frame to TD
 iris_tbl <- copy_to(sc, iris)
 spark_write_td(iris_tbl, "aki.iris", mode="overwrite")
