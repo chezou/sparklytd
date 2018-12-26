@@ -1,23 +1,109 @@
-#' Read TD table
+#' Read a Treasure Data table into a Spark DataFrame
 #'
-#' @param sc An active \code{spark_connection}.
-
+#' @param sc A \code{spark_connection}.
+#' @param name The name to assign to the newly generated table.
+#' @param source Source name of the table on TD. Example: \samp{"sample_datasets.www_access"}
+#' @param options A list of strings with additional options.
+#' @param repartition The number of partitions used to distribute the
+#'   generated table. Use 0 (the default) to avoid partitioning.
+#' @param memory Boolean; should the data be loaded eagerly into memory? (That
+#'   is, should the table be cached?)
+#' @param overwrite Boolean; overwrite the table with the given name if it
+#'   already exists?
+#'
+#' @details You can read TD table through td-spark. You have to set \code{spark.td.apikey},
+#' \code{spark.serializer} appropreately.
+#'
+#' @family Spark serialization routines
+#'
+#' @export
 spark_read_td <- function(sc,
                           name,
                           source,
-                          readOptions = list(),
+                          options = list(),
                           repartition = 0,
                           memory = TRUE,
-                          overwrite = TRUE,
-                          ...){
-  if (overwrite && name %in% DBI::dbListTables(sc)) {
-    DBI::dbRemoveTable(sc, name)
-  }
+                          overwrite = TRUE) {
+  if (overwrite) spark_remove_table_if_exists(sc, name)
 
-  df <- sparklyr:::spark_data_read_generic(sc, "com.treasuredata.spark", "format") %>%
+  df <- spark_data_read_generic(sc, "com.treasuredata.spark", "format", options) %>%
     invoke("load", source)
 
-  sparklyr::invoke(df, "registerTempTable", name)
+  spark_partition_register_df(sc, df, name, repartition, memory)
+}
 
-  dplyr::tbl(sc, name)
+#' Write a Spark DataFrame to Treasure Data
+#'
+#' @param x A Spark DataFrame or dplyr operation
+#' @param name The name to write table.
+#' @param options A list of strings with additional options.
+#' @param mode A \code{character} element. Specifies the behavior when data or
+#'   table already exists. Supported values include: 'error', 'append', 'overwrite' and
+#'   'ignore'. Notice that 'overwrite' will also change the column structure.
+#' @param partition_by A \code{character} vector. Partitions the output by the given columns on the file system.
+#' @param ... Optional arguments; currently unused.
+#'
+#' @family Spark serialization routines
+#'
+#' @export
+spark_write_td <- function(x,
+                           name,
+                           mode = NULL,
+                           options = list(),
+                           partition_by = NULL,
+                           ...) {
+  UseMethod("spark_write_td")
+}
+
+#' @export
+spark_write_td.tbl_spark <- function(x,
+                                     name,
+                                     mode = NULL,
+                                     options = list(),
+                                     partition_by = NULL,
+                                     ...) {
+  # td-spark API can't accept upper case column names
+  x <- dplyr::rename_all(x, function(x){ tolower(x) })
+  sqlResult <- spark_sqlresult_from_dplyr(x)
+
+  if (is.null(options[["table"]])) options[["table"]] <- name
+  spark_data_write_generic(sqlResult, "com.treasuredata.spark", "format", mode, options)
+}
+
+#' @export
+spark_write_td.spark_jobj <- function(x,
+                                      name,
+                                      mode = NULL,
+                                      options = list(),
+                                      partition_by = NULL,
+                                      ...) {
+  spark_expect_jobj_class(x, "org.apache.spark.sql.DataFrame")
+  # td-spark API can't accept upper case column names
+  x <- invoke(x, "toDF", lapply(invoke(x, "columns"), function(x){tolower(x)}))
+
+  if (is.null(options[["table"]])) options[["table"]] <- name
+  spark_data_write_generic(x, "com.treasuredata.spark", "format", mode, options)
+}
+
+#' Download td-spark jar
+#'
+#' Since file size of td-spark jar is larger than GitHub maximum size,
+#' this command enables to download jar within sparklytd directory.
+#'
+#' @param dest_path The destination path where jar will be downloaded to.
+#' @importFrom utils download.file
+#' @export
+download_jar <- function(dest_path = NULL) {
+  if (is.null(dest_path)) {
+    dest_path <- system.file("inst/java", package = "sparklytd")
+  }
+
+  download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.0.0.jar"
+  dest_file <- file.path(dest_path, basename(download_url))
+
+  if (!dir.exists(dirname(dest_file))) {
+    dir.create(dirname(dest_file), recursive = TRUE)
+  }
+
+  download.file(download_url, destfile = dest_file)
 }

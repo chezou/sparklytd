@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+logs
+inst/java/td-spark-assembly*.jar
