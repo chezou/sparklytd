@@ -1,3 +1,29 @@
+#' Download td-spark jar
+#'
+#' Since file size of td-spark jar is larger than GitHub maximum size,
+#' this command enables to download jar within sparklytd directory.
+#'
+#' @param dest_path The destination path where jar will be downloaded to.
+#'
+#' @importFrom utils download.file
+#'
+#' @export
+download_jar <- function(dest_path = NULL) {
+  if (is.null(dest_path)) {
+    dest_path <- system.file("inst/java", package = "sparklytd")
+  }
+
+  download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.0.0.jar"
+  dest_file <- file.path(dest_path, basename(download_url))
+
+  if (!dir.exists(dirname(dest_file))) {
+    dir.create(dirname(dest_file), recursive = TRUE)
+  }
+
+  download.file(download_url, destfile = dest_file)
+}
+
+
 #' Read a Treasure Data table into a Spark DataFrame
 #'
 #' @param sc A \code{spark_connection}.
@@ -83,27 +109,4 @@ spark_write_td.spark_jobj <- function(x,
 
   if (is.null(options[["table"]])) options[["table"]] <- name
   spark_data_write_generic(x, "com.treasuredata.spark", "format", mode, options)
-}
-
-#' Download td-spark jar
-#'
-#' Since file size of td-spark jar is larger than GitHub maximum size,
-#' this command enables to download jar within sparklytd directory.
-#'
-#' @param dest_path The destination path where jar will be downloaded to.
-#' @importFrom utils download.file
-#' @export
-download_jar <- function(dest_path = NULL) {
-  if (is.null(dest_path)) {
-    dest_path <- system.file("inst/java", package = "sparklytd")
-  }
-
-  download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.0.0.jar"
-  dest_file <- file.path(dest_path, basename(download_url))
-
-  if (!dir.exists(dirname(dest_file))) {
-    dir.create(dirname(dest_file), recursive = TRUE)
-  }
-
-  download.file(download_url, destfile = dest_file)
 }

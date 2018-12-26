@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 td-spark-assembly.*.jar$
 ^logs$
+.*Rmd$
+.*nb.html$
