@@ -10,7 +10,7 @@
 #' @export
 download_jar <- function(dest_path = NULL) {
   if (is.null(dest_path)) {
-    dest_path <- system.file("inst/java", package = "sparklytd")
+    dest_path <- file.path(system.file(package="sparklytd"), "java")
   }
 
   download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.0.0.jar"
