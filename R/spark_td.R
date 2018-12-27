@@ -5,6 +5,11 @@
 #'
 #' @param dest_path The destination path where jar will be downloaded to.
 #'
+#' @examples
+#' \dontrun{
+#' download_jar()
+#' }
+#'
 #' @importFrom utils download.file
 #'
 #' @export
@@ -42,6 +47,23 @@ download_jar <- function(dest_path = NULL) {
 #'
 #' @family Spark serialization routines
 #'
+#' @examples
+#' \dontrun{
+#' config <- spark_config()
+#'
+#' config$spark.td.apikey <- Sys.getenv("TD_API_KEY")
+#' config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+#' config$spark.sql.execution.arrow.enabled <- "true"
+#'
+#' sc <- spark_connect(master = "local", config = config)
+#'
+#' www_access <-
+#'   spark_read_td(
+#'   sc,
+#'   name = "www_access",
+#'   source = "sample_datasets.www_access")
+#' }
+#'
 #' @export
 spark_read_td <- function(sc,
                           name,
@@ -70,6 +92,26 @@ spark_read_td <- function(sc,
 #' @param ... Optional arguments; currently unused.
 #'
 #' @family Spark serialization routines
+#'
+#' @importFrom sparklyr spark_write_source
+#' @examples
+#' \dontrun{
+#' config <- spark_config()
+#'
+#' config$spark.td.apikey <- Sys.getenv("TD_API_KEY")
+#' config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+#' config$spark.sql.execution.arrow.enabled <- "true"
+#'
+#' sc <- spark_connect(master = "local", config = config)
+#'
+#' spark_mtcars <- dplyr::copy_to(sc, mtcars, "spark_mtcars", overwrite = TRUE)
+#'
+#' spark_write_td(
+#'   spark_mtcars,
+#'   name = "mydb.mtcars",
+#'   mode = "overwrite"
+#' )
+#' }
 #'
 #' @export
 spark_write_td <- function(x,

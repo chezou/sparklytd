@@ -25,6 +25,26 @@ table already exists. Supported values include: 'error', 'append', 'overwrite' a
 \description{
 Write a Spark DataFrame to Treasure Data
 }
+\examples{
+\dontrun{
+config <- spark_config()
+
+config$spark.td.apikey <- Sys.getenv("TD_API_KEY")
+config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+config$spark.sql.execution.arrow.enabled <- "true"
+
+sc <- spark_connect(master = "local", config = config)
+
+spark_mtcars <- dplyr::copy_to(sc, mtcars, "spark_mtcars", overwrite = TRUE)
+
+spark_write_td(
+  spark_mtcars,
+  name = "mydb.mtcars",
+  mode = "overwrite"
+)
+}
+
+}
 \seealso{
 Other Spark serialization routines: \code{\link{spark_read_td}}
 }

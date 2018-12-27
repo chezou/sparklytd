@@ -13,3 +13,9 @@ download_jar(dest_path = NULL)
 Since file size of td-spark jar is larger than GitHub maximum size,
 this command enables to download jar within sparklytd directory.
 }
+\examples{
+\dontrun{
+download_jar()
+}
+
+}

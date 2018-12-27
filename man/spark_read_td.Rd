@@ -32,6 +32,24 @@ Read a Treasure Data table into a Spark DataFrame
 You can read TD table through td-spark. You have to set \code{spark.td.apikey},
 \code{spark.serializer} appropreately.
 }
+\examples{
+\dontrun{
+config <- spark_config()
+
+config$spark.td.apikey <- Sys.getenv("TD_API_KEY")
+config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+config$spark.sql.execution.arrow.enabled <- "true"
+
+sc <- spark_connect(master = "local", config = config)
+
+www_access <-
+  spark_read_td(
+  sc,
+  name = "www_access",
+  source = "sample_datasets.www_access")
+}
+
+}
 \seealso{
 Other Spark serialization routines: \code{\link{spark_write_td}}
 }
