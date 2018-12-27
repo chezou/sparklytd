@@ -90,10 +90,16 @@ spark_write_td.tbl_spark <- function(x,
                                      ...) {
   # td-spark API can't accept upper case column names
   x <- dplyr::rename_all(x, function(x){ tolower(x) })
-  sqlResult <- spark_sqlresult_from_dplyr(x)
-
   if (is.null(options[["table"]])) options[["table"]] <- name
-  spark_data_write_generic(sqlResult, "com.treasuredata.spark", "format", mode, options)
+
+  spark_write_source(
+    x,
+    "com.treasuredata.spark",
+    mode = mode,
+    options = options,
+    partition_by = partition_by,
+    ...
+  )
 }
 
 #' @export
@@ -108,5 +114,13 @@ spark_write_td.spark_jobj <- function(x,
   x <- invoke(x, "toDF", lapply(invoke(x, "columns"), function(x){tolower(x)}))
 
   if (is.null(options[["table"]])) options[["table"]] <- name
-  spark_data_write_generic(x, "com.treasuredata.spark", "format", mode, options)
+
+  spark_write_source(
+    x,
+    "com.treasuredata.spark",
+    mode = mode,
+    options = options,
+    partition_by = partition_by,
+    ...
+  )
 }
