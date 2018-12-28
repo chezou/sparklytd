@@ -24,15 +24,15 @@ library(sparklytd)
 download_jar()
 
 # Connect td-spark API
-default_conf <- spark_config()
-default_conf$spark.td.apikey=Sys.getenv("TD_API_KEY")
-default_conf$spark.serializer="org.apache.spark.serializer.KryoSerializer"
-default_conf$psark.sql.execution.arrow.enabled="true"
+conf <- spark_config()
+conf$spark.td.apikey=Sys.getenv("TD_API_KEY")
+conf$spark.serializer="org.apache.spark.serializer.KryoSerializer"
+conf$spark.sql.execution.arrow.enabled="true"
 
 # If you want to use Java9, set this option
 options(sparklyr.java9 = TRUE)
 
-sc <- spark_connect(master = "local", config = default_conf)
+sc <- spark_connect(master = "local", config = conf)
 
 # Read data on TD
 df <- spark_read_td(sc, "www_access", "sample_datasets.www_access")

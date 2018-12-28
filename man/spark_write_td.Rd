@@ -46,6 +46,7 @@ spark_write_td(
 
 }
 \seealso{
-Other Spark serialization routines: \code{\link{spark_read_td}}
+Other Spark serialization routines: \code{\link{spark_read_td_query}},
+  \code{\link{spark_read_td}}
 }
 \concept{Spark serialization routines}

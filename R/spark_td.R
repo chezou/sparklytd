@@ -80,6 +80,59 @@ spark_read_td <- function(sc,
   spark_partition_register_df(sc, df, name, repartition, memory)
 }
 
+#' Read Treasure Data data from a query
+#'
+#' @inheritParams spark_read_td
+#' @param query A SQL to execute
+#' @param engine An engine name. "presto", "hive", "pig" can be acceptable.
+#'
+#' @details You can execute queries to TD through td-spark. You have to set \code{spark.td.apikey},
+#' \code{spark.serializer} appropreately.
+#'
+#' @family Spark serialization routines
+#'
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' config <- spark_config()
+#'
+#' config$spark.td.apikey <- Sys.getenv("TD_API_KEY")
+#' config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+#' config$spark.sql.execution.arrow.enabled <- "true"
+#'
+#' sc <- spark_connect(master = "local", config = config)
+#'
+#' df <- spark_read_td_query(sc,
+#'   "sample",
+#'   "sample_datasets.www_access",
+#'   "select count(1) from sample_datasets.www_access") %>% collect()
+#' }
+#'
+#' @export
+spark_read_td_query <- function(sc,
+                                name,
+                                source,
+                                query,
+                                engine = "presto",
+                                options = list(),
+                                repartition = 0,
+                                memory = TRUE,
+                                overwrite = TRUE) {
+  if (overwrite) spark_remove_table_if_exists(sc, name)
+
+  td <- invoke_static(sc,
+                      "com.treasuredata.spark",
+                      "TD",
+                      invoke_new(sc,
+                                 "org.apache.spark.sql.SQLContext",
+                                 spark_context(sc))) %>%
+    invoke("td")
+
+  df <- td %>% invoke(engine, query, source)
+
+  spark_partition_register_df(sc, df, name, repartition, memory)
+}
+
 #' Write a Spark DataFrame to Treasure Data
 #'
 #' @param x A Spark DataFrame or dplyr operation
@@ -166,3 +219,4 @@ spark_write_td.spark_jobj <- function(x,
     ...
   )
 }
+

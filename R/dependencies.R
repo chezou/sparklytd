@@ -6,6 +6,10 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
       system.file(
         sprintf("java/td-spark-assembly_%s-%s.jar", scala_version, td_spark_version),
         package = "sparklytd"
+      ),
+      system.file(
+        sprintf("java/sparklytd-%s-%s.jar", spark_version, scala_version),
+        package = "sparklytd"
       )
     ),
     packages = c(
