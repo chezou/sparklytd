@@ -51,7 +51,8 @@ sc <- spark_connect(master = "local", config = config)
 df <- spark_read_td_query(sc,
   "sample",
   "sample_datasets.www_access",
-  "select count(1) from sample_datasets.www_access") \%>\% collect()
+  "select count(1) from sample_datasets.www_access",
+  engine = "presto") \%>\% collect()
 }
 
 }

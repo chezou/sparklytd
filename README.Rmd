@@ -73,10 +73,24 @@ codes$code <- as.character(codes$code)
 ggplot(data=codes, aes(x=code, y=count)) + geom_bar(stat="identity") + scale_y_continuous(trans='log10')
 ```
 
+You can copy R data.frame to TD.
+
 
 ```{r}
-# Copy R data.frame to TD
 iris_tbl <- copy_to(sc, iris)
 spark_write_td(iris_tbl, "aki.iris", mode="overwrite")
+```
+
+## Execute SQL with Presto/Hive
+
+You can execute Presto or Hive SQL on TD. An execution result will be wirtten as a view of Spark.
+
+
+```{r}
+spark_read_td_query(sc,
+ "sample",
+ "sample_datasets.www_access",
+ "select count(1) from sample_datasets.www_access",
+ engine="presto") %>% collect()
 ```
 

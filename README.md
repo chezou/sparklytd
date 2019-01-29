@@ -41,5 +41,11 @@ df %>% count()
 # Copy R data.frame to TD
 iris_tbl <- copy_to(sc, iris)
 spark_write_td(iris_tbl, "aki.iris", mode="overwrite")
+
+# Execute Presto SQL on TD
+spark_read_td_query(sc,
+ "sample",
+ "sample_datasets.www_access",
+ "select count(1) from sample_datasets.www_access") %>% collect()
 ```
 
