@@ -83,14 +83,32 @@ spark_write_td(iris_tbl, "aki.iris", mode="overwrite")
 
 ## Execute SQL with Presto/Hive
 
-You can execute Presto or Hive SQL on TD. An execution result will be wirtten as a view of Spark.
+If you want to execute Presto SQL on TD, you can use `spark_read_td_presto` function. An execution result will be wirtten as a temporaly view of Spark.
+
+```{r}
+spark_read_td_presto(sc,
+ "sample",
+ "sample_datasets",
+ "select count(1) from www_access") %>% collect()
+```
+
+You can run DDL using `spark_execute_td_presto` function.
+
+```{r}
+spark_execute_td_presto(sc,
+ "aki",
+ "create table if not exists orders (key bigint, status varchar, price double)")
+```
+
+
+You can execute Presto or Hive SQL on TD as a regular TD job.
 
 
 ```{r}
 spark_read_td_query(sc,
  "sample",
- "sample_datasets.www_access",
- "select count(1) from sample_datasets.www_access",
+ "sample_datasets",
+ "select count(1) from www_access",
  engine="presto") %>% collect()
 ```
 

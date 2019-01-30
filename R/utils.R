@@ -9,3 +9,13 @@ spark_remove_table_if_exists <- get("spark_remove_table_if_exists",
 
 spark_expect_jobj_class <- get("spark_expect_jobj_class",
                                envir = asNamespace("sparklyr"))
+
+invoke_td <- function(sc) {
+  invoke_static(sc,
+                "com.treasuredata.spark",
+                "TD",
+                invoke_new(sc,
+                           "org.apache.spark.sql.SQLContext",
+                           spark_context(sc))) %>%
+    invoke("td")
+}
