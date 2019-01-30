@@ -18,7 +18,7 @@ download_jar <- function(dest_path = NULL) {
     dest_path <- file.path(system.file(package="sparklytd"), "java")
   }
 
-  download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.0.0.jar"
+  download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.1.0.jar"
   dest_file <- file.path(dest_path, basename(download_url))
 
   if (!dir.exists(dirname(dest_file))) {
@@ -32,7 +32,7 @@ download_jar <- function(dest_path = NULL) {
 #' Read a Treasure Data table into a Spark DataFrame
 #'
 #' @param sc A \code{spark_connection}.
-#' @param name The name to assign to the newly generated table.
+#' @param name The name to assign to the newly generated table on Spark.
 #' @param source Source name of the table on TD. Example: \samp{"sample_datasets.www_access"}
 #' @param options A list of strings with additional options.
 #' @param repartition The number of partitions used to distribute the
@@ -76,60 +76,6 @@ spark_read_td <- function(sc,
 
   df <- spark_data_read_generic(sc, "com.treasuredata.spark", "format", options) %>%
     invoke("load", source)
-
-  spark_partition_register_df(sc, df, name, repartition, memory)
-}
-
-#' Read Treasure Data data from a query
-#'
-#' @inheritParams spark_read_td
-#' @param query A SQL to execute
-#' @param engine An engine name. "presto", "hive", "pig" can be acceptable.
-#'
-#' @details You can execute queries to TD through td-spark. You have to set \code{spark.td.apikey},
-#' \code{spark.serializer} appropreately.
-#'
-#' @family Spark serialization routines
-#'
-#' @examples
-#' \dontrun{
-#' library(dplyr)
-#' config <- spark_config()
-#'
-#' config$spark.td.apikey <- Sys.getenv("TD_API_KEY")
-#' config$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
-#' config$spark.sql.execution.arrow.enabled <- "true"
-#'
-#' sc <- spark_connect(master = "local", config = config)
-#'
-#' df <- spark_read_td_query(sc,
-#'   "sample",
-#'   "sample_datasets.www_access",
-#'   "select count(1) from sample_datasets.www_access",
-#'   engine = "presto") %>% collect()
-#' }
-#'
-#' @export
-spark_read_td_query <- function(sc,
-                                name,
-                                source,
-                                query,
-                                engine = "presto",
-                                options = list(),
-                                repartition = 0,
-                                memory = TRUE,
-                                overwrite = TRUE) {
-  if (overwrite) spark_remove_table_if_exists(sc, name)
-
-  td <- invoke_static(sc,
-                      "com.treasuredata.spark",
-                      "TD",
-                      invoke_new(sc,
-                                 "org.apache.spark.sql.SQLContext",
-                                 spark_context(sc))) %>%
-    invoke("td")
-
-  df <- td %>% invoke(engine, query, source)
 
   spark_partition_register_df(sc, df, name, repartition, memory)
 }
@@ -220,4 +166,3 @@ spark_write_td.spark_jobj <- function(x,
     ...
   )
 }
-

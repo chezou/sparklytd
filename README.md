@@ -34,6 +34,7 @@ options(sparklyr.java9 = TRUE)
 
 sc <- spark_connect(master = "local", config = conf)
 
+library(dplyr)
 # Read data on TD
 df <- spark_read_td(sc, "www_access", "sample_datasets.www_access")
 df %>% count()
@@ -43,9 +44,20 @@ iris_tbl <- copy_to(sc, iris)
 spark_write_td(iris_tbl, "aki.iris", mode="overwrite")
 
 # Execute Presto SQL on TD
+spark_read_td_presto(sc,
+ "sample",
+ "sample_datasets",
+ "select count(1) from www_access") %>% collect()
+
+# Run non-query Presto statements, e.g., CREATE TABLE, DROP TABLE, etc.
+spark_execute_td_presto(sc,
+ "sample_datasets",
+ "create table if not exists orders (key bigint, status varchar, price double)")
+
+# Execute Presto or Hive SQL as a regular TD job
 spark_read_td_query(sc,
  "sample",
  "sample_datasets.www_access",
- "select count(1) from sample_datasets.www_access") %>% collect()
+ "select count(1) from sample_datasets.www_access", engine = "presto") %>% collect()
 ```
 

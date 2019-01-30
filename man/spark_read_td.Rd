@@ -10,7 +10,7 @@ spark_read_td(sc, name, source, options = list(), repartition = 0,
 \arguments{
 \item{sc}{A \code{spark_connection}.}
 
-\item{name}{The name to assign to the newly generated table.}
+\item{name}{The name to assign to the newly generated table on Spark.}
 
 \item{source}{Source name of the table on TD. Example: \samp{"sample_datasets.www_access"}}
 
@@ -51,7 +51,9 @@ www_access <-
 
 }
 \seealso{
-Other Spark serialization routines: \code{\link{spark_read_td_query}},
+Other Spark serialization routines: \code{\link{spark_execute_td_presto}},
+  \code{\link{spark_read_td_presto}},
+  \code{\link{spark_read_td_query}},
   \code{\link{spark_write_td}}
 }
 \concept{Spark serialization routines}
