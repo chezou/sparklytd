@@ -21,6 +21,10 @@ download_jar <- function(dest_path = NULL) {
   download_url <- "https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-1.1.0.jar"
   dest_file <- file.path(dest_path, basename(download_url))
 
+  if (file.exists(dest_file)) {
+    stop("jar is already downloaded. Abort.")
+  }
+
   if (!dir.exists(dirname(dest_file))) {
     dir.create(dirname(dest_file), recursive = TRUE)
   }
