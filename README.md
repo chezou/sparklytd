@@ -1,6 +1,6 @@
 # sparklytd
 
-sparklytd is an extension to read and write TD data from/to R.
+sparklytd is an extension to read and write TD data from/to R. See also [an example notebook](https://rpubs.com/chezou/sparklytd-example).
 
 ## Installation
 
