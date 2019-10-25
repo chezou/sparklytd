@@ -1,6 +1,6 @@
 Package: sparklytd
 Title: Read and write data from/to Arm Treasure Data with sparklyr
-Version: 0.3.0
+Version: 0.3.0.9000
 Authors@R: 
     person(given = "Aki",
            family = "Ariga",
