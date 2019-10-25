@@ -42,7 +42,7 @@ download_jar()
 default_conf <- spark_config()
 default_conf$spark.td.apikey=Sys.getenv("TD_API_KEY")
 default_conf$spark.serializer="org.apache.spark.serializer.KryoSerializer"
-default_conf$psark.sql.execution.arrow.enabled="true"
+default_conf$spark.sql.execution.arrow.enabled="true"
 
 sc <- spark_connect(master = "local", config = default_conf)
 ```

@@ -1,5 +1,5 @@
 spark_dependencies <- function(spark_version, scala_version, ...) {
-  td_spark_version = "1.1.0"
+  td_spark_version = "19.7.0"
 
   sparklyr::spark_dependency(
     jars = c(
