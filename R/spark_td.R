@@ -4,6 +4,7 @@
 #' this command enables to download jar within sparklytd directory.
 #'
 #' @param dest_path The destination path where jar will be downloaded to.
+#' @param force_download Flag for force download
 #'
 #' @examples
 #' \dontrun{
@@ -13,7 +14,7 @@
 #' @importFrom utils download.file
 #'
 #' @export
-download_jar <- function(dest_path = NULL) {
+download_jar <- function(dest_path = NULL, force_download = FALSE) {
   if (is.null(dest_path)) {
     dest_path <- file.path(system.file(package="sparklytd"), "java")
   }
@@ -22,7 +23,7 @@ download_jar <- function(dest_path = NULL) {
   download_url <- sprintf("https://s3.amazonaws.com/td-spark/td-spark-assembly_2.11-%s.jar", td_spark_version)
   dest_file <- file.path(dest_path, basename(download_url))
 
-  if (file.exists(dest_file)) {
+  if (file.exists(dest_file) && !force_download) {
     stop("jar is already downloaded. Abort.")
   }
 
